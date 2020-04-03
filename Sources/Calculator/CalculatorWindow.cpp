@@ -52,7 +52,7 @@ CalculatorWindow::~CalculatorWindow()
  */
 void CalculatorWindow::on_numericField_textEdited(const QString &text)
 {
-    // Установить новое значение (если валидно)
+    // Установить новое значение (если корректно)
     lastValidValue_ = CalculatorWindow::formatNumericValue(lastValidValue_);
     ui_->numericField->setText(lastValidValue_);
 
@@ -73,7 +73,7 @@ void CalculatorWindow::on_btnClear_clicked()
     // Очистка верхнего поля
     this->ui_->numericFieldUpper->setText("");
 
-    // Очиска буфера
+    // Очистка буфера
     this->numberBuffer_ = 0;
 
     // Последнее действие - очистка
@@ -90,13 +90,13 @@ void CalculatorWindow::on_btnEqual_clicked()
     this->performOperation(lastOperation_,this->ui_->numericField->text());
 
     // Обновить поле номера
-    auto newValue = QString::number(this->numberBuffer_,'g');
+    const auto newValue = QString::number(this->numberBuffer_,'g');
     this->ui_->numericField->setText(newValue);
 
     // Очистка верхнего поля
     this->ui_->numericFieldUpper->setText("");
 
-    // Очиска буфера
+    // Очистка буфера
     this->numberBuffer_ = 0;
 
     // Последнее действие - очистка
@@ -124,7 +124,7 @@ void CalculatorWindow::onNumericButtonPressed()
         numericValue = button->text();
     }
 
-    // Установить новое значение (если валидно)
+    // Установить новое значение (если корректно)
     lastValidValue_ = CalculatorWindow::formatNumericValue(numericValue,lastValidValue_);
     ui_->numericField->setText(lastValidValue_);
 
@@ -145,7 +145,7 @@ void CalculatorWindow::onOperationButtonPressed()
     ui_->numericField->setText(newValue);
 
     // Получить отправителя события (сигнала)
-    auto button = qobject_cast<QPushButton*>(sender());
+    const auto button = qobject_cast<QPushButton*>(sender());
 
     // Смена последней операции и действия
     if(button->objectName() == "btnPlus"){
@@ -199,8 +199,8 @@ QString CalculatorWindow::formatNumericValue(const QString &inputString, const Q
     // Копировать строку для дальнейшего форматирования
     auto formatted = inputString;
 
-    // Если в строке больше 1 символов и если строка начинается сноля, после которого не следует запятой
-    // очиститьс троку от начинающихся нулей
+    // Если в строке больше 1 символов и если строка начинается с ноля, после которого не следует запятой
+    // очистить строку от начинающихся нулей
     if(formatted.size() > 1){
         if(formatted[0] == '0' && formatted[1] != ',') formatted.remove(QRegExp("^[0]*"));
     }
@@ -239,9 +239,9 @@ QString CalculatorWindow::formatNumericValue(const QString &inputString, const Q
 void CalculatorWindow::performOperation(CalculatorWindow::OperationType operation, const QString &currentStrValue)
 {
     bool success;
-    auto numeric = currentStrValue.toDouble(&success);
+    const auto numeric = currentStrValue.toDouble(&success);
     auto upperString = ui_->numericFieldUpper->text();
-    bool signRequired = !upperString.isEmpty();
+    const auto signRequired = !upperString.isEmpty();
 
     if(success){
         switch(operation)

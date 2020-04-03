@@ -20,6 +20,7 @@ set(QT_STATIC_LINK ON)
 
 # Пути к библиотеке QT для различных компиляторов и платформ
 # NOTICE: В случае отсутствия какой-либо сборки необходимо указать путь к любой существующей (чтобы избежать ошибок CMAKE)
+# NOTICE: Собрать проект с отсутствующей сборкой QT таким образом не получится, но ошибок CMAKE не будет
 set(QT_GNU_X86_DIR          "C:\\Qt\\5.9.9\\mingw53_32\\")
 set(QT_GNU_X86_STATIC_DIR   "C:\\Qt\\5.9.9\\mingw53_32\\")
 set(QT_GNU_X64_DIR          "C:\\Qt\\5.9.9\\mingw53_32\\")
@@ -95,13 +96,13 @@ if(WIN32)
                 COMMAND ${CMAKE_COMMAND} -E copy ${QT5_DIR}bin\\Qt5Widgets$<$<CONFIG:Debug>:d>.dll ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
                 COMMAND ${CMAKE_COMMAND} -E copy ${QT5_DIR}bin\\Qt5Gui$<$<CONFIG:Debug>:d>.dll ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
                 COMMENT "Copying Qt binaries" VERBATIM)
-        # Если это GNU (MinGW) нужны еще библиотеи рантайма
+        # Если это GNU (MinGW) нужны еще runtime-библиотеки
         if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
             ADD_CUSTOM_COMMAND(TARGET ${TARGET_NAME} POST_BUILD
                     COMMAND ${CMAKE_COMMAND} -E copy ${QT5_DIR}bin\\libgcc_s_dw2-1.dll ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
                     COMMAND ${CMAKE_COMMAND} -E copy ${QT5_DIR}bin\\libstdc++-6.dll ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
                     COMMAND ${CMAKE_COMMAND} -E copy ${QT5_DIR}bin\\libwinpthread-1.dll ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-                    COMMENT "Copying MinGW runtime binaries for QT" VERBATIM)
+                    COMMENT "Copying MinGW runtime binaries for Qt" VERBATIM)
         endif()
     endif()
 else()
@@ -113,24 +114,29 @@ SET(ADDITIONAL_LIBS "")
 
 # Если QT линкуется статически
 if(QT_STATIC_LINK)
-    # Основные модули QT
-    SET(ADDITIONAL_LIBS ${ADDITIONAL_LIBS}
-            "${QT5_DIR}/lib/qtpcre2$<$<CONFIG:Debug>:d>.lib"
-            "${QT5_DIR}/lib/qtlibpng$<$<CONFIG:Debug>:d>.lib"
-            "${QT5_DIR}/lib/qtharfbuzz$<$<CONFIG:Debug>:d>.lib"
-            "${QT5_DIR}/lib/qtfreetype$<$<CONFIG:Debug>:d>.lib"
-            "${QT5_DIR}/lib/Qt5FontDatabaseSupport$<$<CONFIG:Debug>:d>.lib"
-            "${QT5_DIR}/lib/Qt5ThemeSupport$<$<CONFIG:Debug>:d>.lib"
-            "${QT5_DIR}/lib/Qt5EventDispatcherSupport$<$<CONFIG:Debug>:d>.lib"
-            "${QT5_DIR}/lib/Qt5AccessibilitySupport$<$<CONFIG:Debug>:d>.lib")
-
-    # Плагины
-    if(WIN32)
-        SET(ADDITIONAL_LIBS ${ADDITIONAL_LIBS} "${QT5_DIR}/plugins/platforms/qwindows$<$<CONFIG:Debug>:d>.lib")
+    if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+        SET(LIB_EXT ".lib")
+    else()
+        SET(LIB_EXT ".a")
     endif()
 
-    # Библиотеки ОС
-    SET(ADDITIONAL_LIBS ${ADDITIONAL_LIBS} "imm32.lib" "version.lib" "netapi32.lib" "uxtheme.lib" "dwmapi.lib" "Ws2_32.lib" "Winmm.lib")
+    # Основные модули QT
+    SET(ADDITIONAL_LIBS ${ADDITIONAL_LIBS}
+            "${QT5_DIR}/lib/qtpcre2$<$<CONFIG:Debug>:d>${LIB_EXT}"
+            "${QT5_DIR}/lib/qtlibpng$<$<CONFIG:Debug>:d>${LIB_EXT}"
+            "${QT5_DIR}/lib/qtharfbuzz$<$<CONFIG:Debug>:d>${LIB_EXT}"
+            "${QT5_DIR}/lib/qtfreetype$<$<CONFIG:Debug>:d>${LIB_EXT}"
+            "${QT5_DIR}/lib/Qt5FontDatabaseSupport$<$<CONFIG:Debug>:d>${LIB_EXT}"
+            "${QT5_DIR}/lib/Qt5ThemeSupport$<$<CONFIG:Debug>:d>${LIB_EXT}"
+            "${QT5_DIR}/lib/Qt5EventDispatcherSupport$<$<CONFIG:Debug>:d>${LIB_EXT}"
+            "${QT5_DIR}/lib/Qt5AccessibilitySupport$<$<CONFIG:Debug>:d>${LIB_EXT}")
+
+    if(WIN32)
+        # Плагины
+        SET(ADDITIONAL_LIBS ${ADDITIONAL_LIBS} "${QT5_DIR}/plugins/platforms/qwindows$<$<CONFIG:Debug>:d>${LIB_EXT}")
+        # Библиотеки ОС
+        SET(ADDITIONAL_LIBS ${ADDITIONAL_LIBS} "imm32.lib" "version.lib" "netapi32.lib" "uxtheme.lib" "dwmapi.lib" "Ws2_32.lib" "Winmm.lib")
+    endif()
 endif()
 
 # Линковка приложения и дополнительных библиотек

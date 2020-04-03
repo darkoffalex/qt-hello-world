@@ -1,5 +1,7 @@
 .idea
+.vs
 Bin/*
+CMakeSettings.json
 cmake-build-debug-mingwx86
 cmake-build-debug-visual-studio-x64
 cmake-build-release-mingwx86
