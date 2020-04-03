@@ -1,0 +1,8 @@
+<!DOCTYPE RCC>
+<RCC version="1.0">
+    <qresource>
+        <file>fonts/Lato-Light.ttf</file>
+        <file>fonts/Lato-LightItalic.ttf</file>
+        <file>icons/icon.png</file>
+    </qresource>
+</RCC>
